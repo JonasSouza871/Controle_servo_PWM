@@ -1,30 +1,52 @@
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
 
-#define PWM_PERIOD_US 20000    // Período total de 20ms (50Hz)
-#define SERVO_180_DEG 2400     // 2400µs = 0,12 do período (180 graus)
-#define SERVO_90_DEG 1470      // 1470µs = 0,0735 do período (90 graus)
-#define SERVO_0_DEG 500        // 500µs = 0,025% do período (0 graus)
-#define DELAY_MS 5000          // Tempo de espera entre posições
-#define Pino_servo 22 //Pino que o servo estará conectado
+// Definições de parâmetros para o controle do servo
+#define PERIODO_PWM_US 20000  // Período total do PWM: 20ms (50Hz)
+#define PULSO_0_GRAUS 500     // Pulso para 0°: 500µs
+#define PULSO_180_GRAUS 2400  // Pulso para 180°: 2400µs
+#define PASSO_US 5            // Incremento/decremento de 5µs por pulso
+#define ATRASO_MS 10          // Atraso de 10ms entre ajustes
+#define PINO_SERVO 22         // Pino conectado ao servomotor
+
+// Inicializa e configura o PWM no pino do servo
+void configurar_pwm(uint pino) {
+    gpio_set_function(pino, GPIO_FUNC_PWM); // Define a função do pino como PWM
+    uint fatia_pwm = pwm_gpio_to_slice_num(pino); // Obtém a fatia de PWM correspondente ao pino
+    
+    pwm_set_clkdiv(fatia_pwm, 125.0f); // Define a frequência do PWM para 1MHz (1µs por contagem)
+    pwm_set_wrap(fatia_pwm, PERIODO_PWM_US - 1); // Define o período total do PWM (20ms)
+    pwm_set_enabled(fatia_pwm, true); // Ativa o PWM
+}
+
+// Define o pulso PWM para controlar a posição do servo
+void definir_angulo_servo(uint pino, int pulso) {
+    uint fatia_pwm = pwm_gpio_to_slice_num(pino);
+    pwm_set_chan_level(fatia_pwm, PWM_CHAN_A, pulso);
+}
 
 int main() {
-    stdio_init_all();
-    gpio_set_function(Pino_servo, GPIO_FUNC_PWM); // seta o pino do servo como função PWM
-    uint slice_num = pwm_gpio_to_slice_num(Pino_servo);
-    pwm_set_clkdiv(slice_num, 125.0f);  // Clock = 1µs/incremento
-    pwm_set_wrap(slice_num, PWM_PERIOD_US - 1);  // 19999 = 20ms
-    pwm_set_enabled(slice_num, true); //controle das pociçoes
+    stdio_init_all(); // Inicializa comunicação padrão
+    configurar_pwm(PINO_SERVO); // Configura o PWM no pino do servo
 
-    // Posição 1: 180 graus -> 0,12 de dusty cicle
-    pwm_set_chan_level(slice_num, PWM_CHAN_A, SERVO_180_DEG);
-    sleep_ms(DELAY_MS);
-    // Posição 2: 90 graus  -> 0,0735 de dusty cicle
-    pwm_set_chan_level(slice_num, PWM_CHAN_A, SERVO_90_DEG);
-    sleep_ms(DELAY_MS);
-    // Posição 3: 0 graus -> 0,025 de dusty cycle
-    pwm_set_chan_level(slice_num, PWM_CHAN_A, SERVO_0_DEG);
-    sleep_ms(DELAY_MS);
+    int pulso_atual = PULSO_0_GRAUS; // Começa com o servo na posição 0°
+    int direcao_passo = PASSO_US; // Define a direção do movimento
 
+    while (true) {
+        definir_angulo_servo(PINO_SERVO, pulso_atual); // Ajusta o ângulo do servo
+        sleep_ms(ATRASO_MS); // Aguarda um tempo para suavizar o movimento
+
+        // Atualiza o pulso para movimentar o servo gradualmente
+        pulso_atual += direcao_passo;
+
+        // Inverte a direção do movimento ao atingir os limites
+        if (pulso_atual >= PULSO_180_GRAUS) {
+            pulso_atual = PULSO_180_GRAUS;
+            direcao_passo = -PASSO_US;
+        } else if (pulso_atual <= PULSO_0_GRAUS) {
+            pulso_atual = PULSO_0_GRAUS;
+            direcao_passo = PASSO_US;
+        }
+    }
     return 0;
 }
