@@ -7,7 +7,7 @@ Projeto para controle de um servo motor usando sinais PWM. O servo se move entre
 ## 🔧 **Hardware**  
 - **Microcontrolador**: Raspberry Pi Pico W  
 - **Componentes Principais**:  
-  - Servo Motor (ex: SG90)  
+  - Servo Motor  
 - **Conexões**:  
   - Cabo Micro-USB  
   - Jumpers  
@@ -93,9 +93,12 @@ make
 ---
 
 ## 🔗 **Diagrama do Circuito**  
-![Diagrama](./diagram.json) *Configuração compatível com o Wokwi.*  
+![image](https://github.com/user-attachments/assets/d078c59a-b1fb-48fc-b1d7-5c9188d98cac)
+
 
 ---
+
+## 🔗 **Vídeo de Funcionamento**
 
 ## 📞 **Contato**  
 - 👤 **Autor**: Jonas Souza 
