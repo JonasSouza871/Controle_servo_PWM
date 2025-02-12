@@ -92,7 +92,8 @@ make
 
 ---
 
-##💡 Observações com LED
+## 💡 Observações com LED
+
 Ao adaptar o código PWM do servo para controlar um LED, foi possível observar o efeito de dimming (variação de intensidade) do LED. A mudança gradual do duty cycle do PWM, originalmente pensada para posicionar o servo, resultou em uma transição suave entre o LED menos brilhoso e seu brilho máximo, demonstrando a versatilidade da técnica PWM para diferentes aplicações.
 
 ## 🔗 **Diagrama do Circuito**  
